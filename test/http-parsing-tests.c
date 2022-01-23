@@ -67,6 +67,7 @@ void testCreateHttpHeaderDateString(void) {
                 .tm_mday = 3,
                 .tm_mon = 11,
                 .tm_year = 91,
+                .tm_zone = "UTC"
         };
 
         createHttpHeaderDateString(timegm(&time), result, sizeof(result));
@@ -105,6 +106,7 @@ void testCreateResponse(void) {
                 .tm_mday = 3,
                 .tm_mon = 11,
                 .tm_year = 91,
+                .tm_zone = "UTC"
         };
 
         const response successResponse = { .status = 200,

@@ -87,6 +87,9 @@ void getHttpUriFromRequestLine(const char *requestLine,
 void createHttpHeaderDateString(time_t time, char *dest, size_t destLen) {
         // time_t conforms to time protocol as seen in RFC 868
         const struct tm tm = *gmtime(&time);
+        // gcc sets the timezone to "GMT", clang uses "UTC"
+        // Explicitly set tm_zone to avoid cross-platform differences
+        memccpy(tm.tm_zone, "UTC", '\0', 3);
         strftime(dest, destLen, "Date: %a, %d %b %Y %H:%M:%S %Z", &tm);
 }
 
