@@ -35,11 +35,13 @@ TESTOBJECTS := $(patsubst $(TESTDIR)/%,$(BUILDDIR)/%,$(TESTSOURCES:.$(SRCEXT)=.o
 
 $(TARGET): $(OBJECTS)
 	@echo "Linking..."
+	@mkdir -p $(BINDIR)
 	$(CC) $^ -o $(TARGET)
 
 # server.o contains the entrypoint of the non-test code, filter it out so there aren't two entrypoints
 test: $(UNITYOBJECTS) $(TESTOBJECTS) $(filter-out $(BUILDDIR)/$(ENTRYPOINTOBJ),$(OBJECTS))
 	@echo "Linking test object files...";
+	@mkdir -p $(BINDIR)
 	$(CC) $^ -o $(TESTTARGET)
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
