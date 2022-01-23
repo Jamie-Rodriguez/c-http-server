@@ -30,7 +30,7 @@ void getHttpUriFromRequestLine(const char *requestLine,
                                size_t destLen);
 
 void createHttpHeaderDateString(time_t time, char *dest, size_t destLen);
-void createContentLengthLine(unsigned int n, char *dest, size_t destLen);
+void createContentLengthLine(size_t, char *dest, size_t destLen);
 
 void createResponse(response response, char *dest, size_t destLen);
 

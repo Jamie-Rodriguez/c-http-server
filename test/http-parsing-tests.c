@@ -1,4 +1,5 @@
 #include "http-parsing.h"
+#include "tests.h"
 #include <assert.h>
 #include <string.h>
 #include <unity.h>
@@ -9,7 +10,7 @@
              --header 'Content-Type: application/json' \
              --data '{"login":"my_login","password":"my_password"}'
 */
-const char *request =
+static const char *request =
     "POST / HTTP/1.1\r\n"
     "Host: localhost:8080\r\n"
     "User-Agent: curl/7.64.1\r\n"
@@ -19,7 +20,7 @@ const char *request =
     "\r\n"
     "{\"login\":\"my_login\",\"password\":\"my_password\"}\r\n";
 
-void testGetFirstLineFromHttpRequest() {
+void testGetFirstLineFromHttpRequest(void) {
         char result[32];
         memset(result, 0, sizeof(result));
         getFirstLineFromHttpRequest(request, result, sizeof(result));
@@ -27,7 +28,7 @@ void testGetFirstLineFromHttpRequest() {
         TEST_ASSERT_EQUAL_STRING_LEN("POST / HTTP/1.1", result, sizeof(result));
 }
 
-void testGetBodyFromHttpRequest() {
+void testGetBodyFromHttpRequest(void) {
         char result[64];
         memset(result, 0, sizeof(result));
         getBodyFromHttpRequest(request, result, sizeof(result));
@@ -38,7 +39,7 @@ void testGetBodyFromHttpRequest() {
             sizeof(result));
 }
 
-void testGetHttpVerbFromRequestLine() {
+void testGetHttpVerbFromRequestLine(void) {
         TEST_ASSERT_TRUE(getHttpVerbFromRequestLine("GET /test HTTP/1.1") ==
                          GET);
         TEST_ASSERT_TRUE(getHttpVerbFromRequestLine("POST /test HTTP/1.1") ==
@@ -47,7 +48,7 @@ void testGetHttpVerbFromRequestLine() {
                          UNKNOWN);
 }
 
-void testGetHttpUriFromRequestLine() {
+void testGetHttpUriFromRequestLine(void) {
         char result[8];
         memset(result, 0, sizeof(result));
         getHttpUriFromRequestLine("GET /test HTTP/1.1", result, sizeof(result));
@@ -55,7 +56,7 @@ void testGetHttpUriFromRequestLine() {
         TEST_ASSERT_EQUAL_STRING_LEN("/test", result, sizeof(result));
 }
 
-void testCreateHttpHeaderDateString() {
+void testCreateHttpHeaderDateString(void) {
         char result[64];
         memset(result, 0, sizeof(result));
 
@@ -75,7 +76,7 @@ void testCreateHttpHeaderDateString() {
                                      sizeof(result));
 }
 
-void testCreateContentLengthLine() {
+void testCreateContentLengthLine(void) {
         char result[32];
         memset(result, 0, sizeof(result));
 
@@ -93,7 +94,7 @@ void testCreateContentLengthLine() {
                                      sizeof(result));
 }
 
-void testCreateResponse() {
+void testCreateResponse(void) {
         char result[512];
         memset(result, 0, sizeof(result));
 

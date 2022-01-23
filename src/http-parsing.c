@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-const char *serverLine = "Server: Jamie's Server (1.0.0)";
+static const char *serverLine = "Server: Jamie's Server (1.0.0)";
 
 void getFirstLineFromHttpRequest(const char *request,
                                  char *dest,
@@ -90,8 +90,8 @@ void createHttpHeaderDateString(time_t time, char *dest, size_t destLen) {
         strftime(dest, destLen, "Date: %a, %d %b %Y %H:%M:%S %Z", &tm);
 }
 
-void createContentLengthLine(unsigned int n, char *dest, size_t destLen) {
-        snprintf(dest, destLen, "Content-Length: %d", n);
+void createContentLengthLine(size_t n, char *dest, size_t destLen) {
+        snprintf(dest, destLen, "Content-Length: %zu", n);
 }
 
 void createResponse(response response, char *dest, size_t destLen) {
