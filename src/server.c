@@ -103,6 +103,4 @@ int main(const int argc, char const *argv[]) {
 
                 close(socket);
         }
-
-        return 0;
 }

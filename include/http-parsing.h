@@ -14,10 +14,10 @@ enum mimeType { JSON = 0, PLAIN_TEXT = 1 };
 
 typedef struct response {
         unsigned int status;
-        const char *body;
+        enum mimeType mime;
         size_t bodyContentLen;
         time_t time;
-        enum mimeType mime;
+        const char *body;
 } response;
 
 void getFirstLineFromHttpRequest(const char *request,
