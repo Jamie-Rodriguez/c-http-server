@@ -7,7 +7,7 @@ However I think that this repo is useful as a template for a modern C project th
 
 I organised this project with a more modern, yet minimal project structure; featuring unit testing using the lightweight library [Unity](https://github.com/ThrowTheSwitch/Unity).
 
-To remain minimalistic, this project only uses *Make* for it's buildsystem. The `makefile` makes use of Make's "*pattern rules*" so that you don't need to individually include a file in both the *runtime* and *unit-testing* builds every time you add a new file to the project.
+To remain minimalistic, this project only uses [Make](https://www.gnu.org/software/make/) for it's buildsystem. The `makefile` makes use of Make's "[pattern rules](https://www.gnu.org/software/make/manual/html_node/Pattern-Rules.html)" so that you don't need to individually include a file in both the *runtime* and *unit-testing* builds every time you add a new file to the project.
 
 # Dependencies
 - A POSIX-compliant shell for commands used in `makefile` and `get-dependencies.sh`.
