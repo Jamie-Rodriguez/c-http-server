@@ -3,7 +3,7 @@
 
 CC := clang
 # Note: Disabled -Wincompatible-pointer-types-discards-qualifiers
-CFLAGS := -g -Wall -Wno-incompatible-pointer-types-discards-qualifiers -D_FORTIFY_SOURCE=2 -ffunction-sections -fdata-sections
+CFLAGS := -g -Wall -Wextra -Wpedantic -Wconversion -Wno-incompatible-pointer-types-discards-qualifiers -D_FORTIFY_SOURCE=2 -ffunction-sections -fdata-sections
 SRCEXT := c
 
 SRCDIR := src
