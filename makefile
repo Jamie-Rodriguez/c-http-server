@@ -4,7 +4,7 @@
 CC := clang
 LDFLAGS := -fsanitize=undefined -fsanitize=address -fno-omit-frame-pointer
 # Note: Disabled -Wincompatible-pointer-types-discards-qualifiers
-CFLAGS :=-std=c2x -g3 -march=native -g3 -Wall -Wextra -Wpedantic -Wconversion -Wno-incompatible-pointer-types-discards-qualifiers $(LDFLAGS) -ffunction-sections -fdata-sections
+CFLAGS :=-std=c2x -g3 -march=native -Wall -Wextra -Wpedantic -Wconversion -Wno-incompatible-pointer-types-discards-qualifiers $(LDFLAGS) -ffunction-sections -fdata-sections
 SRCEXT := c
 
 SRCDIR := src
