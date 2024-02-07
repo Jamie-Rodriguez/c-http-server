@@ -2,8 +2,9 @@
 # https://hiltmon.com/blog/2013/07/03/a-simple-c-plus-plus-project-structure
 
 CC := clang
+LDFLAGS := -fsanitize=undefined -fsanitize=address -fno-omit-frame-pointer
 # Note: Disabled -Wincompatible-pointer-types-discards-qualifiers
-CFLAGS := -g -Wall -Wextra -Wpedantic -Wconversion -Wno-incompatible-pointer-types-discards-qualifiers -D_FORTIFY_SOURCE=2 -ffunction-sections -fdata-sections
+CFLAGS :=-std=c2x -g3 -march=native -g3 -Wall -Wextra -Wpedantic -Wconversion -Wno-incompatible-pointer-types-discards-qualifiers $(LDFLAGS) -ffunction-sections -fdata-sections
 SRCEXT := c
 
 SRCDIR := src
@@ -17,7 +18,7 @@ ENTRYPOINTOBJ := server.o
 TARGET := $(BINDIR)/server
 
 TESTDIR := test
-TESTTARGET := $(BINDIR)/runTests
+TESTTARGET := $(BINDIR)/run-tests
 
 # External Library: Unity
 UNITYSOURCEDIR := Unity-2.5.2/src
@@ -26,23 +27,27 @@ UNITYOBJECTS := $(patsubst $(LIBDIR)/$(UNITYSOURCEDIR)/%,$(BUILDDIR)/%,$(UNITYSO
 
 INC := -I include -I $(LIBDIR)/$(UNITYSOURCEDIR)
 
-SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
+SOURCES := $(wildcard $(SRCDIR)/*.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 
-TESTSOURCES := $(shell find $(TESTDIR) -type f -name *.$(SRCEXT))
+TESTSOURCES := $(wildcard $(TESTDIR)/*.$(SRCEXT))
 TESTOBJECTS := $(patsubst $(TESTDIR)/%,$(BUILDDIR)/%,$(TESTSOURCES:.$(SRCEXT)=.o))
+
+
+.PHONY: clean test check-cppcheck check-infer
 
 
 $(TARGET): $(OBJECTS)
 	@echo "Linking..."
 	@mkdir -p $(BINDIR)
-	$(CC) $^ -o $(TARGET)
+	$(CC) $(LDFLAGS) $^ -o $(TARGET)
 
 # server.o contains the entrypoint of the non-test code, filter it out so there aren't two entrypoints
 test: $(UNITYOBJECTS) $(TESTOBJECTS) $(filter-out $(BUILDDIR)/$(ENTRYPOINTOBJ),$(OBJECTS))
 	@echo "Linking test object files...";
 	@mkdir -p $(BINDIR)
-	$(CC) $^ -o $(TESTTARGET)
+	$(CC) $(LDFLAGS) $^ -o $(TESTTARGET)
+	$(TESTTARGET)
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	@echo "Building object files...";
@@ -63,4 +68,32 @@ clean:
 	@echo "Cleaning...";
 	$(RM) -r $(BUILDDIR)/*.o $(TARGET) $(TESTTARGET)
 
-.PHONY: clean
+# --suppress=missingIncludeSystem is needed if cppcheck cannot find the standard headers on your system
+check-cppcheck:
+	cppcheck . --verbose   \
+		--showtime=summary \
+		-j 4               \
+		-I include/        \
+		--enable=all       \
+		--suppress=missingIncludeSystem
+
+check-infer:
+	$(MAKE) clean
+	infer run --cost                  \
+		--bufferoverrun               \
+		--loop-hoisting               \
+		--procedures                  \
+		--procedures-attributes       \
+		--procedures-name             \
+		--procedures-summary          \
+		--pulse                       \
+		--quandary                    \
+		--source-files                \
+		--topl                        \
+		--no-cxx                      \
+		--html                        \
+		--write-html                  \
+		--issues-tests issues.txt     \
+		--cost-issues-tests costs.txt \
+		-- make
+	$(MAKE) clean
