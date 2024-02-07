@@ -1,6 +1,3 @@
-# Adapted from Hilton Lipschitz's makefile setup that he detailed on his blog
-# https://hiltmon.com/blog/2013/07/03/a-simple-c-plus-plus-project-structure
-
 CC := clang
 LDFLAGS := -fsanitize=undefined -fsanitize=address -fno-omit-frame-pointer
 # Note: Disabled -Wincompatible-pointer-types-discards-qualifiers
