@@ -5,5 +5,10 @@ lib/*
 # Ignore any executables
 bin/*
 
+.cache/
+
+# JSON Compilation Database file
+compile_commands.json
+
 # Ignore macOS-specific files
 .DS_Store
