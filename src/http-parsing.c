@@ -3,157 +3,99 @@
 #include <stdio.h>
 #include <string.h>
 
-static const char *serverLine = "Server: Jamie's Server (1.0.0)";
+static const char* serverLine = "Server: Jamie's Server (1.0.0)";
 
-void getFirstLineFromHttpRequest(const char *request,
-                                 char *dest,
-                                 size_t destLen) {
-        // strtok() mutates the original string! Make a copy
-        char str[MAX_REQUEST_LEN];
-        memset(str, 0, sizeof(str));
-        memccpy(str, request, '\0', sizeof(str));
+const char* getBodyFromHttpRequest(const char* request) {
+        if (request == NULL) return NULL;
 
-        // Get the string before the first \r\n
-        const char *line = strtok(str, "\r\n");
+        // HTTP body starts after the first occurrence of \r\n\r\n
+        const char* bodyStart = strstr(request, "\r\n\r\n");
+        if (bodyStart != NULL) return bodyStart + 4;
 
-        memccpy(dest, line, '\0', destLen);
+        // Some non-standard implementations might use just \n\n
+        bodyStart = strstr(request, "\n\n");
+        if (bodyStart != NULL) return bodyStart + 2;
+
+        return NULL;
 }
 
-void getBodyFromHttpRequest(const char *request, char *dest, size_t destLen) {
-        // strsep() mutates the original string! Make a copy
-        char str[MAX_REQUEST_LEN];
-        memset(str, 0, sizeof(str));
-        memccpy(str, request, '\0', sizeof(str));
+enum httpVerb getHttpVerbFromRequest(const char* request) {
+        // Find the first space to determine verb length
+        const char* firstSpace = strchr(request, ' ');
+        if (firstSpace == NULL) { return UNKNOWN; }
 
-        // To avoid the incompatible pointer types error, use char **, not char (*)[]
-        char *s = str;
-        char *previousString;
+        const size_t verbLength = (size_t) (firstSpace - request);
 
-        bool foundEmptyLine = false;
-        while (s != NULL) {
-                previousString = strsep(&s, "\n");
-
-                // Process the body
-                if (foundEmptyLine) {
-                        // Check string and strip out carriage returns
-                        // I do this by terminating the string when I find one
-                        for (size_t i = 0; i < strlen(previousString); i++) {
-                                if (previousString[i] == '\r')
-                                        previousString[i] = 0;
-                        }
-                        memccpy(dest, previousString, '\0', destLen);
-                        return;
-                }
-
-                // Found the empty line, next loop is the body
-                if (strcmp(previousString, "\r") == 0) foundEmptyLine = true;
-        }
-}
-
-enum httpVerb getHttpVerbFromRequestLine(const char *requestLine) {
-        // strtok() mutates the original string! Make a copy
-        char str[MAX_REQUEST_LINE_LEN];
-        memset(str, 0, sizeof(str));
-        memccpy(str, requestLine, '\0', sizeof(str));
-
-        const char *verb = strtok(str, " ");
-
-        // C doesn't allow switch statements on strings? Wot?
-        if (strcmp(verb, "GET") == 0) {
+        // Check each verb by comparing only the prefix
+        if (MATCHES(request, verbLength, "GET"))
                 return GET;
-        } else if (strcmp(verb, "POST") == 0) {
+        else if (MATCHES(request, verbLength, "POST"))
                 return POST;
-        } else {
+        else
                 return UNKNOWN;
-        }
 }
 
-void getHttpUriFromRequestLine(const char *requestLine,
-                               char *dest,
-                               size_t destLen) {
-        // strtok() mutates the original string! Make a copy
-        char str[MAX_REQUEST_LINE_LEN];
-        memset(str, 0, sizeof(str));
-        memccpy(str, requestLine, '\0', sizeof(str));
-
+const char* getHttpUriFromRequest(const char* request) {
         // Assume the URI will be the second space-delimited token
-        strtok(str, " ");
-        const char *uri = strtok(NULL, " ");
+        char* dest = strchr(request, ' ');
+        dest = strchr(dest, ' ');
+        dest = dest + 1;
 
-        // Longest HTTP verb is length("CONNECT") = 7
-        memccpy(dest, uri, '\0', destLen);
+        return dest;
 }
 
-void createHttpHeaderDateString(time_t time, char *dest, size_t destLen) {
-        // time_t conforms to time protocol as seen in RFC 868
-        const struct tm tm = *gmtime(&time);
-        // gcc sets the timezone to "GMT", clang uses "UTC"
-        // Explicitly set tm_zone to avoid cross-platform differences
-        memccpy(tm.tm_zone, "UTC", '\0', 3);
-        strftime(dest, destLen, "Date: %a, %d %b %Y %H:%M:%S %Z", &tm);
+void createHttpHeaderDateString(time_t time, char* dest, size_t destLen) {
+        const struct tm* tm = gmtime(&time);
+        strftime(dest, destLen, "Date: %a, %d %b %Y %H:%M:%S GMT", tm);
 }
 
-void createContentLengthLine(size_t n, char *dest, size_t destLen) {
+void createContentLengthLine(size_t n, char* dest, size_t destLen) {
         snprintf(dest, destLen, "Content-Length: %zu", n);
 }
 
-void createResponse(response response, char *dest, size_t destLen) {
-        char statusLine[64];
-        memset(statusLine, 0, sizeof(statusLine));
+void createResponse(response response, char* dest, size_t destLen) {
+        const char* statusLine;
+        switch (response.status) {
+                case 200:
+                        statusLine = "HTTP/1.1 200 OK";
+                        break;
+                case 404:
+                        statusLine = "HTTP/1.1 404 Not Found";
+                        break;
+                default:
+                        statusLine = "HTTP/1.1 500 Internal Server Error";
+                        break;
+        }
+
+        const char* contentType;
+        switch (response.mime) {
+                case JSON:
+                        contentType = "application/json";
+                        break;
+                case PLAIN_TEXT:
+                        contentType = "text/plain; charset=UTF-8";
+                        break;
+                default:
+                        contentType = "application/octet-stream";
+                        break;
+        }
+
         char dateLine[64];
-        memset(dateLine, 0, sizeof(dateLine));
-        char contentTypeLine[64];
-        memset(contentTypeLine, 0, sizeof(contentTypeLine));
-        char contentLengthLine[32];
-        memset(contentLengthLine, 0, sizeof(contentLengthLine));
-
-        if (response.status == 200) {
-                memccpy(statusLine,
-                        "HTTP/1.1 200 OK",
-                        '\0',
-                        sizeof(statusLine));
-        } else if (response.status == 404) {
-                memccpy(statusLine,
-                        "HTTP/1.1 404 Not Found",
-                        '\0',
-                        sizeof(statusLine));
-        } else {
-                memccpy(statusLine,
-                        "HTTP/1.1 500 Internal Server Error",
-                        '\0',
-                        sizeof(statusLine));
-        }
-
         createHttpHeaderDateString(response.time, dateLine, sizeof(dateLine));
-
-        if (response.mime == JSON) {
-                memccpy(contentTypeLine,
-                        "Content-Type: application/json",
-                        '\0',
-                        sizeof(contentTypeLine));
-        } else if (response.mime == PLAIN_TEXT) {
-                memccpy(contentTypeLine,
-                        "Content-Type: text/plain; charset=UTF-8",
-                        '\0',
-                        sizeof(contentTypeLine));
-        } else {
-                memccpy(contentTypeLine,
-                        "Content-Type: application/octet-stream",
-                        '\0',
-                        sizeof(contentTypeLine));
-        }
-
-        createContentLengthLine(response.bodyContentLen,
-                                contentLengthLine,
-                                sizeof(contentLengthLine));
 
         snprintf(dest,
                  destLen,
-                 "%s\r\n%s\r\n%s\r\n%s\r\n%s\r\n\r\n%s",
+                 "%s\r\n"
+                 "%s\r\n"
+                 "Content-Type: %s\r\n"
+                 "Content-Length: %zu\r\n"
+                 "%s\r\n"
+                 "\r\n"
+                 "%s",
                  statusLine,
                  dateLine,
-                 contentTypeLine,
-                 contentLengthLine,
+                 contentType,
+                 response.bodyContentLen,
                  serverLine,
                  response.body);
 }
