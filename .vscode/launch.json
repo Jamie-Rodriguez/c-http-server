@@ -5,57 +5,67 @@
       "label": "build-debug",
       "type": "shell",
       "command": "make",
-      "args": ["debug"],
+      "args": [
+        "debug"
+      ],
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "problemMatcher": ["$gcc"],
+      "problemMatcher": [
+        "$gcc"
+      ],
       "detail": "Build the debug version of the server"
     },
     {
       "label": "build-tests",
       "type": "shell",
       "command": "make",
-      "args": ["test"],
+      "args": [
+        "test"
+      ],
       "group": "build",
-      "problemMatcher": ["$gcc"],
-      "detail": "Build test executable without running"
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "detail": "Build test executable"
     },
     {
       "label": "clean",
       "type": "shell",
       "command": "make",
-      "args": ["clean"],
+      "args": [
+        "clean"
+      ],
       "group": "build",
       "problemMatcher": [],
       "detail": "Clean build artifacts"
     }
-],
-"configurations": [
-  {
-    "name": "Debug Tests",
-    "type": "cppdbg",
-    "request": "launch",
-    "program": "${workspaceFolder}/bin/run-tests",
-    "args": [],
-    "stopAtEntry": false,
-    "cwd": "${workspaceFolder}",
-    "environment": [],
-    "externalConsole": false,
-    "MIMode": "lldb"
-  },
-  {
-    "name": "Debug Server",
-    "type": "cppdbg",
-    "request": "launch",
-    "program": "${workspaceFolder}/bin/server-debug",
-    "args": [],
-    "stopAtEntry": false,
-    "cwd": "${workspaceFolder}",
-    "environment": [],
-    "externalConsole": false,
-    "MIMode": "lldb"
-  }
-]
+  ],
+  "configurations": [
+    {
+      "name": "Debug Tests",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/run-tests",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "lldb"
+    },
+    {
+      "name": "Debug Server",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/server-debug",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "lldb"
+    }
+  ]
 }
