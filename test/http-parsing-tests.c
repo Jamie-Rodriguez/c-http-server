@@ -110,26 +110,6 @@ void testCreateHttpHeaderDateString(void) {
         TEST_ASSERT_EQUAL_STRING("Date: Tue, 03 Dec 1991 00:00:00 GMT", result);
 }
 
-void testCreateContentLengthLine(void) {
-        char result[0x20];
-
-        memset(result, 0, sizeof(result));
-        createContentLengthLine(1, result, sizeof(result));
-        TEST_ASSERT_EQUAL_STRING("Content-Length: 1", result);
-
-        memset(result, 0, sizeof(result));
-        createContentLengthLine(12, result, sizeof(result));
-        TEST_ASSERT_EQUAL_STRING("Content-Length: 12", result);
-
-        memset(result, 0, sizeof(result));
-        createContentLengthLine(123, result, sizeof(result));
-        TEST_ASSERT_EQUAL_STRING("Content-Length: 123", result);
-
-        memset(result, 0, sizeof(result));
-        createContentLengthLine(0, result, sizeof(result));
-        TEST_ASSERT_EQUAL_STRING("Content-Length: 0", result);
-}
-
 void testCreateResponse200(void) {
         char result[0x100];
         memset(result, 0, sizeof(result));

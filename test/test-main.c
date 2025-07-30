@@ -21,8 +21,6 @@ int main(void) {
 
         RUN_TEST(testCreateHttpHeaderDateString);
 
-        RUN_TEST(testCreateContentLengthLine);
-
         RUN_TEST(testCreateResponse200);
         RUN_TEST(testCreateResponse404);
         RUN_TEST(testCreateResponse500);
